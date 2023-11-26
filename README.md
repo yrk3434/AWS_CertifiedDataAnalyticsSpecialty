@@ -9,3 +9,7 @@
     4. 데이터 분석
     5. 데이터 시각화
     6. 보안
+
+- [참고 자료](https://www.sundog-education.com/aws-certified-big-data-course-materials/)
+
+- 실습 비용 대략 $10(AWS Budget)
