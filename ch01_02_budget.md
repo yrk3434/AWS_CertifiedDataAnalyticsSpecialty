@@ -1,5 +1,9 @@
 
 
+# AWS 사용 예산 설정
+
+- 사용요금을 체크하지 않으면 aws 서비스를 사용하면서 과한 과금이 될 수 있다. 이를 방지하기 위해 사전에 예산을 설정해야 한다.
+
 1. 예산 페이지 접속
 - AWS 페이지 > budget > 예산생성하기(create budget)
     <div style="text-align:center;">
