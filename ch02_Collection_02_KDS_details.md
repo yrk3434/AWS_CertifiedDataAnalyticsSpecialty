@@ -162,3 +162,5 @@
         <div style="text-align:center;">
             <img src="./img/ch02_02_img09.png" />
         </div>
+
+        - 위 딕셔너리 키 중 Record에 스트리밍 중인 데이터가 표시되는데 데이터는 Base64 기준으로 인코딩 되어 표기됨, Base64 페이지 통해 디코딩해 원 데이터 확인 가능
