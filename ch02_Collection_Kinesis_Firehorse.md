@@ -1,0 +1,73 @@
+# Kenesis Firehose 실습1 
+
+## Firehorse 스트림 생성
+
+- 소스 및 대상 선택: 
+    - 소스: 'Direct Put' 선택 -> 직접 데이터를 작성해서 스트리밍하고자 함<br/>(aws 제공 엔드유저 라이브러리 사용)
+    - 대상: Amazon S3 -> S3로 대상설정하면 아래 S3 버킷 만드는 탭 뜸
+- Firehorse 스트림 이름 변경 ex. 구매로그
+- 레코드 변형: 건너뛰어도 됨. 레코드 변형하려면 람다 사용
+- S3 버킷 만들기: 이름은 유일한(unique) 것으로 설정
+    - ACL 비활성화됨 선택(ACL(Access Control List)은 객체와 버킷에 대한 접근 권한을 제어하는 방법)
+        - 추후 Athena 서비스에 접근할 거라서 복잡한 소유 권한 피룡 없음(Amazon Athena는 서버리스(서버를 관리할 필요 없는) 인터랙티브 쿼리 서비스로, 사용자가 표준 SQL을 사용하여 Amazon S3에 저장된 데이터를 직접 쿼리)
+    - 퍼블릭 엑세스 차단해두기
+    - 이 실습에서는 일단 버킷 versiong 기능도 비활성화
+- 버킷 만들고 다시 파이어호스로 돌아와서 위에서 생성한 버킷을 대상으로 설정
+    - 파티셔닝 기능을 활성화하면 편리하긴하나 비용상 일단 여기서는 비활성화
+- S3 버킷 접두사(prefix 지정하기): 데이터 생성 시간을 prefix로 지정하고자 함 -> 데이터 생성시간이 자동으로 파티션으로 적용됨
+    ```bash
+    year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/
+    ```
+- S3 버킷 오류 출력 접두사: 오류 발생시 저장 위치
+    ```bash
+    fherroroutputbase/!{firehose:random-string}/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd}/
+    ```
+- 버퍼 힌트, 압축, 파일 확장자 및 암호화
+    - 버퍼 크기
+    - 버퍼 간격
+    - 암호화, 압축 활성화 여부 선택
+- 고급 설정
+    - 오류 로깅 등 설정
+- 이제 끝! -> Friehose 스트림 생성 클릭
+
+- 참고. IAM 유저로 파이어호스 스트림을 생성하려고 하니 생성되지 않음 -> 권한을 부여할 수 있는 정책을 새로 만듦
+- IAM> 정책에서 'iam_CreateRole'라는 정책과 iam_cloud_watch라는 정책을 새로 만듦
+    <div style="text-align:center;">
+        <img src="./img/ch02_firehose_iam.png" />
+    </div>
+
+- IAM 계정으로 파이어호스를 생성하기 위해 다음과 같은 정책을 새로 만들어 IAM 계정에 추가함
+    ```bash
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents",
+                        "logs:DescribeLogStreams"
+                            "firehose:CreateDeliveryStream",
+                        "firehose:PutRecord",
+                        "firehose:PutRecordBatch",
+                        "firehose:CreateDeliveryStream",
+                        "firehose:DescribeDeliveryStream",
+                        "firehose:DeleteDeliveryStream",
+                        "s3:PutObject",
+                        "s3:GetBucketLocation",
+                        "s3:ListBucket",
+                        "iam:AttachRolePolicy",
+                        "iam:CreateRole",
+                        "iam:CreatePolicy",
+                        "iam:PutRolePolicy",
+                        "iam:PassRole"
+                    ],
+                    "Resource": [
+                        "*"
+                    ]
+                }
+            ]
+        }
+    ```
+
